@@ -5,7 +5,9 @@ import com.inditex.zboost.entity.ProductOrderItem;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.sql.PreparedStatement;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Repository
 public class ProductRepositoryImpl extends BaseRepository<Product> implements ProductRepository {
@@ -23,6 +25,7 @@ public class ProductRepositoryImpl extends BaseRepository<Product> implements Pr
          * TODO: EJERCICIO 1.a) Recupera las distintas categorias de los productos disponibles.
          */
         String sql = """
+                select distinct category from products;
                 """;
         
         return this.queryForList(sql, Map.of());
@@ -46,10 +49,23 @@ public class ProductRepositoryImpl extends BaseRepository<Product> implements Pr
          *
          *  Pista: A la hora de filtrar, pasar los valores a mayúsculas o minúsculas. Ejemplo: Uso de la función SQL upper().
          */
+        Set<String> productCategories = Set.copyOf(getProductCategories());
         Map<String, Object> params = new HashMap<>();
 
-        String sql = """
-            """;
+        String sql;
+
+        if(!categories.isPresent()) {
+            sql = """
+                select * from products;
+                """;
+        } else {
+            List<String> lowerCategories = categories.get().stream().map(s -> s.toLowerCase()).collect(Collectors.toList());
+            params.put("category", lowerCategories);
+
+            sql = """
+                    select * from products where lower(category) IN(:category)
+                    """;
+        }
         
         return this.query(sql, params, Product.class);
     }

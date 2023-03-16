@@ -2,6 +2,7 @@ package com.inditex.zboost.repository;
 
 import com.inditex.zboost.entity.Order;
 import com.inditex.zboost.entity.OrderDetail;
+import com.inditex.zboost.entity.Product;
 import com.inditex.zboost.exception.NotFoundException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -24,7 +25,14 @@ public class OrderRepositoryImpl extends BaseRepository<Order> implements OrderR
         /*
          * TODO: EJERCICIO 2.a) Recupera un listado de los ultimos N pedidos (recuerda ordenar por fecha)
          */
-        return List.of();
+        Map<String, Object> params = new HashMap<>();
+        params.put("limit", Integer.toString(limit));
+        String sql = """
+                    select * from orders order by date desc limit :limit;
+                    """;
+        System.out.println(sql);
+
+        return this.query(sql, params, Order.class);
     }
 
     @Override
@@ -49,6 +57,7 @@ public class OrderRepositoryImpl extends BaseRepository<Order> implements OrderR
          * Recuerda que, si un pedido no es encontrado por su ID, debes notificarlo debidamente como se recoge en el contrato
          * que estas implementando (codigo de estado HTTP 404 Not Found). Para ello puedes usar la excepcion {@link com.inditex.zboost.exception.NotFoundException}
          */
+
         return new OrderDetail();
     }
 }
